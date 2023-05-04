@@ -335,7 +335,12 @@ class Sequential(Block):
         # TODO: Implement the forward pass by passing each block's output
         # as the input of the next.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = x
+        for block in self.blocks:
+            if block.__class__ == CrossEntropyLoss:
+                out = block(out, kw['y'])
+            else:
+                out = block(out)
         # ========================
 
         return out
@@ -347,7 +352,9 @@ class Sequential(Block):
         # Each block's input gradient should be the previous block's output
         # gradient. Behold the backpropagation algorithm in action!
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        din = dout
+        for block in reversed(self.blocks):
+            din = block.backward(din)
         # ========================
 
         return din
@@ -357,7 +364,8 @@ class Sequential(Block):
 
         # TODO: Return the parameter tuples from all blocks.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        for block in self.blocks:
+            params = params + block.params()
         # ========================
 
         return params
