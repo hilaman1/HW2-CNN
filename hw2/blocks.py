@@ -75,7 +75,8 @@ class Linear(Block):
         # TODO: Create the weight matrix (w) and bias vector (b).
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.w = torch.normal(mean = 0.0, std = wstd, size=[in_features, out_features])
+        self.b = torch.normal(mean = 0.0, std = wstd, size=[out_features])
         # ========================
 
         self.dw = torch.zeros_like(self.w)
@@ -100,7 +101,7 @@ class Linear(Block):
         # TODO: Compute the affine transform
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = torch.matmul(x,self.w) + self.b
         # ========================
 
         self.grad_cache['x'] = x
@@ -119,7 +120,10 @@ class Linear(Block):
         #   - db, the gradient of the loss with respect to b
         # You should accumulate gradients in dw and db.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        # we need to use the chain rule - multiply by the gradient of the current operation
+        dx = torch.matmul(dout, self.w.T)
+        self.dw += torch.matmul(x.T,dout)
+        self.db += torch.matmul(torch.ones(dout.shape[0]), dout)
         # ========================
 
         return dx
