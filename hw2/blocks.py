@@ -164,7 +164,7 @@ class ReLU(Block):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        dx = torch.multiply(dout, 1*(x>0))
+        dx = torch.multiply(dout, (x>0))
         # ========================
 
         return dx
@@ -194,7 +194,9 @@ class Sigmoid(Block):
         # TODO: Implement the Sigmoid function. Save whatever you need into
         # grad_cache.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = 1 / (1+torch.exp(-x))
+        # derivative of sigmoid: s(x)*(1-s(x))
+        self.grad_cache['s_x'] = out
         # ========================
 
         return out
@@ -207,7 +209,8 @@ class Sigmoid(Block):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        s_x = self.grad_cache['s_x']
+        dx = dout * (s_x * (1 - s_x))
         # ========================
 
         return dx
@@ -251,7 +254,8 @@ class CrossEntropyLoss(Block):
         # Tip: to get a different column from each row of a matrix tensor m,
         # you can index it with m[range(num_rows), list_of_cols].
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        # add mean reduction to get a scalar
+        loss = torch.mean((torch.log(torch.sum(torch.exp(x),dim=1)) - x[range(N),y]))
         # ========================
 
         self.grad_cache['x'] = x
@@ -270,7 +274,10 @@ class CrossEntropyLoss(Block):
 
         # TODO: Calculate the gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        derivative = (torch.exp(x).T / torch.sum(torch.exp(x),dim=1)).T
+        # if x_k == x_y the derivative of x_y is -1, else 0
+        derivative[range(N),y] -= 1
+        dx = dout * (derivative / N)
         # ========================
 
         return dx
