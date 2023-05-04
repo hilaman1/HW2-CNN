@@ -149,7 +149,7 @@ class ReLU(Block):
 
         # TODO: Implement the ReLU operation.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = torch.max(torch.zeros_like(x),x)
         # ========================
 
         self.grad_cache['x'] = x
@@ -164,7 +164,7 @@ class ReLU(Block):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        dx = torch.multiply(dout, 1*(x>0))
         # ========================
 
         return dx
