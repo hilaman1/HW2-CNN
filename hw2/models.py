@@ -34,7 +34,33 @@ class MLP(Block):
 
         # TODO: Build the MLP architecture as described.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        if len(hidden_features) == 0:
+            # no hidden layers, output_features equals to number of classes
+            blocks.append(Linear(in_features, num_classes))
+        else:
+            # add the first linear layer, that outputs to the first hidden layer
+            blocks.append(Linear(in_features, hidden_features[0]))
+
+        for i in range(0,len(hidden_features)-1):
+            # add activation function between linear layers
+            if activation == 'relu':
+                blocks.append(ReLU())
+            else:
+                blocks.append(Sigmoid())
+            if (dropout > 0):
+                blocks.append(Dropout(dropout))
+            blocks.append(Linear(hidden_features[i], hidden_features[i+1]))
+
+        # add last activation layer
+        if activation == 'relu':
+            blocks.append(ReLU())
+        else:
+            blocks.append(Sigmoid())
+        if (dropout > 0):
+            blocks.append(Dropout(dropout))
+        # add the last linear layer
+        blocks.append(Linear(hidden_features[-1], num_classes))
+
         # ========================
 
         self.sequence = Sequential(*blocks)
