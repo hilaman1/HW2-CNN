@@ -70,7 +70,7 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     loss_fn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr, weight_decay=reg)
     trainer = training.TorchTrainer(model, loss_fn, optimizer, device)
-    fit_res = trainer.fit(dl_train, dl_test, epochs, checkpoints, early_stopping, print_every=100, max_batches=batches)
+    fit_res = trainer.fit(dl_train, dl_test, epochs, checkpoints, early_stopping, 100, max_batches=batches) # TODO: is batches needed?
     # print("fit_res: ", fit_res)
 
 
