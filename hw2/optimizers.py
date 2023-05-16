@@ -88,9 +88,12 @@ class MomentumSGD(Optimizer):
         self.reg = reg
         self.momentum = momentum
 
-        # TODO: Add your own initializations as needed.
+        # Add your own initializations as needed.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.v = []
+        for p, dp in params:
+            self.v.append(torch.zeros_like(p))
+        self.param_idx = 0
         # ========================
 
     def step(self):
@@ -98,11 +101,15 @@ class MomentumSGD(Optimizer):
             if dp is None:
                 continue
 
-            # TODO: Implement the optimizer step.
+            # Implement the optimizer step.
             # update the parameters tensor based on the velocity. Don't forget
             # to include the regularization term.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            self.v[self.param_idx] = self.momentum * self.v[self.param_idx] - self.learn_rate * (dp + self.reg * p)
+            p += self.v[self.param_idx]
+            self.param_idx += 1
+            if self.param_idx == len(self.params):
+                self.param_idx = 0
             # ========================
 
 
@@ -121,9 +128,12 @@ class RMSProp(Optimizer):
         self.decay = decay
         self.eps = eps
 
-        # TODO: Add your own initializations as needed.
+        # Add your own initializations as needed.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.r = []
+        for p, dp in params:
+            self.r.append(torch.zeros_like(p))
+        self.param_idx = 0
         # ========================
 
     def step(self):
@@ -131,10 +141,15 @@ class RMSProp(Optimizer):
             if dp is None:
                 continue
 
-            # TODO: Implement the optimizer step.
+            # Implement the optimizer step.
             # Create a per-parameter learning rate based on a decaying moving
             # average of it's previous gradients. Use it to update the
             # parameters tensor.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            dloss = dp + self.reg * p
+            self.r[self.param_idx] = self.decay * self.r[self.param_idx] + (1 - self.decay) * dloss * dloss
+            p -= (self.learn_rate / torch.sqrt(self.r[self.param_idx] + self.eps)) * dloss
+            self.param_idx += 1
+            if self.param_idx == len(self.params):
+                self.param_idx = 0
             # ========================

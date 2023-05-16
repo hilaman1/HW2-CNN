@@ -64,7 +64,7 @@ class Trainer(abc.ABC):
                 verbose = True
             self._print(f'--- EPOCH {epoch+1}/{num_epochs} ---', verbose)
 
-            # TODO: Train & evaluate for one epoch
+            # Train & evaluate for one epoch
             # - Use the train/test_epoch methods.
             # - Save losses and accuracies in the lists above.
             # - Optional: Implement checkpoints. You can use torch.save() to
@@ -72,7 +72,26 @@ class Trainer(abc.ABC):
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            train_epoch_result = self.train_epoch(dl_train)
+            test_epoch_result = self.test_epoch(dl_test)
+
+            train_loss.append(sum(train_epoch_result.losses) / len(train_epoch_result.losses))
+            train_acc.append(train_epoch_result.accuracy)
+
+            test_loss_curr = sum(test_epoch_result.losses) / len(test_epoch_result.losses)
+            test_loss.append(test_loss_curr)
+            test_acc.append(test_epoch_result.accuracy)
+
+            actual_num_epochs += 1
+
+            if (best_acc is None) or (best_acc < 1 - test_loss_curr):
+                best_acc = 1 - test_loss_curr
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
+
+            if epochs_without_improvement == early_stopping:
+                break
             # ========================
 
         return FitResult(actual_num_epochs,
@@ -203,11 +222,14 @@ class BlocksTrainer(Trainer):
     def test_batch(self, batch) -> BatchResult:
         X, y = batch
 
-        # TODO: Evaluate the Block model on one batch of data.
+        # Evaluate the Block model on one batch of data.
         # - Forward pass
         # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        scores = self.model(X)
+        loss = self.loss_fn(scores, y)
+        y_pred = torch.argmax(scores, dim=1)
+        num_correct = torch.sum(y_pred == y)
         # ========================
 
         return BatchResult(loss, num_correct)
