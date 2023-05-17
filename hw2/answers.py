@@ -48,7 +48,7 @@ def part2_dropout_hp():
     # dropout.
     # ====== YOUR CODE: ======
     wstd = 0.15
-    lr = 0.001
+    lr = 0.003
     # ========================
     return dict(wstd=wstd, lr=lr)
 
@@ -58,10 +58,10 @@ part2_q1 = r"""
 1. Overall, the graphs showing the results match what we expected to see.
 For dropout = 0 (no dropout), we get overfitting, as when the training loss keeps decreasing, the test loss starts to go up at some point, and the test accuracy cease to improve.
 This is to be expected, as the dataset is small and we don't get good generalization. 
-Using dropout allowed us to achieve better generalization, as we can see that the test loss keeps decreasing and the accuracy increases as we progress through the epochs. 
+Using dropout allowed us to achieve better generalization, as we can see that the there is no overfitting - the test loss is lower and doesn't increase by noticeable amount, and the accuracy increases as we progress through the epochs. 
 
-2. Using dropout = 0.4 yielded better test results (lower test loss and higher test accuracy) compared to dropout = 0.8. 
-With dropout = 0.8 we get bad results due to dropping too many nodes, which significantly hinders our abillity to fit well.
+2. Using dropout = 0.4 yielded better test results compared to dropout = 0.8 (about the same test loss and higher test accuracy). 
+With dropout = 0.8 we are dropping too many nodes, which significantly hinders our abillity to fit well, and that is why it leads to worse test results.
 """
 
 part2_q2 = r"""
