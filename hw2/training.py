@@ -65,7 +65,7 @@ class Trainer(abc.ABC):
                 verbose = True
             self._print(f'--- EPOCH {epoch + 1}/{num_epochs} ---', verbose)
 
-            # TODO: Train & evaluate for one epoch
+            # Train & evaluate for one epoch
             # - Use the train/test_epoch methods.
             # - Save losses and accuracies in the lists above.
             # - Optional: Implement checkpoints. You can use torch.save() to
@@ -73,7 +73,25 @@ class Trainer(abc.ABC):
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            actual_num_epochs += 1
+
+            train_epoch_result = self.train_epoch(dl_train, **kw)
+            train_loss.append(sum(train_epoch_result.losses) / len(train_epoch_result.losses))
+            train_acc.append(train_epoch_result.accuracy)
+
+            test_epoch_result = self.test_epoch(dl_test, **kw)
+            test_acc_curr = test_epoch_result.accuracy
+            test_loss.append(sum(test_epoch_result.losses) / len(test_epoch_result.losses))
+            test_acc.append(test_acc_curr)
+
+            if (best_acc is None) or (best_acc < test_acc_curr):
+                best_acc = test_acc_curr
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
+
+            if epochs_without_improvement == early_stopping:
+                break
             # ========================
 
         return FitResult(actual_num_epochs,
@@ -183,13 +201,20 @@ class BlocksTrainer(Trainer):
     def train_batch(self, batch) -> BatchResult:
         X, y = batch
 
-        # TODO: Train the Block model on one batch of data.
+        # Train the Block model on one batch of data.
         # - Forward pass
         # - Backward pass
         # - Optimize params
         # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        scores = self.model(X)
+        loss = self.loss_fn(scores, y)
+        self.optimizer.zero_grad()
+        dout = self.loss_fn.backward()
+        self.model.backward(dout)
+        self.optimizer.step()
+        y_pred = torch.argmax(scores, dim=1)
+        num_correct = torch.sum(y_pred == y)
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -197,11 +222,14 @@ class BlocksTrainer(Trainer):
     def test_batch(self, batch) -> BatchResult:
         X, y = batch
 
-        # TODO: Evaluate the Block model on one batch of data.
+        # Evaluate the Block model on one batch of data.
         # - Forward pass
         # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        scores = self.model(X)
+        loss = self.loss_fn(scores, y)
+        y_pred = torch.argmax(scores, dim=1)
+        num_correct = torch.sum(y_pred == y)
         # ========================
 
         return BatchResult(loss, num_correct)
