@@ -121,7 +121,7 @@ class ConvClassifier(nn.Module):
         N = len(self.filters)
         P = self.pool_every
 
-        # (N + 2 * padding - F) / stride + 1
+        # ((N + 2 * padding - F) / stride) + 1
 
         kernel_size_conv = (3, 3)
         stride_conv = (1, 1)
@@ -132,26 +132,25 @@ class ConvClassifier(nn.Module):
         padding_max_pool = (0, 0)
 
         filter_index = 0
-        out_channels = self.filters[filter_index]
         for i in range(N // P):
             for j in range(P):
+                out_channels = self.filters[filter_index]
                 convolutional = nn.Conv2d(in_channels, out_channels, kernel_size_conv, stride=stride_conv, padding=padding_conv)
                 layers.append(convolutional)
                 layers.append(nn.ReLU(inplace=True))
 
                 in_channels = out_channels
                 filter_index += 1
-                out_channels = self.filters[filter_index]
 
                 # TODO: validate
-                in_w = ((in_w + 2 * padding_conv[0] - kernel_size_conv[0]) // stride_conv[0]) + 1
-                in_h = ((in_h + 2 * padding_conv[1] - kernel_size_conv[1]) // stride_conv[1]) + 1
+                in_h = ((in_h + 2 * padding_conv[0] - kernel_size_conv[0]) // stride_conv[0]) + 1
+                in_w = ((in_w + 2 * padding_conv[1] - kernel_size_conv[1]) // stride_conv[1]) + 1
 
             layers.append(nn.MaxPool2d(kernel_size_max_pool, stride_max_pool, padding_max_pool))
 
             # TODO: validate
-            in_w = ((in_w + 2 * padding_max_pool[0] - kernel_size_max_pool[0]) // stride_max_pool[0]) + 1
-            in_h = ((in_h + 2 * padding_max_pool[1] - kernel_size_max_pool[1]) // stride_max_pool[1]) + 1
+            in_h = ((in_h + 2 * padding_max_pool[0] - kernel_size_max_pool[0]) // stride_max_pool[0]) + 1
+            in_w = ((in_w + 2 * padding_max_pool[1] - kernel_size_max_pool[1]) // stride_max_pool[1]) + 1
 
         self.h = in_h
         self.w = in_w
@@ -171,6 +170,7 @@ class ConvClassifier(nn.Module):
         # ====== YOUR CODE: ======
 
         M = len(self.hidden_dims)
+        layers.append(nn.Flatten())
 
         # we take the image and put it to one long vector
         in_features = self.filters[-1] * self.h * self.w
@@ -183,8 +183,7 @@ class ConvClassifier(nn.Module):
 
             in_features = out_features
 
-        layers.append(nn.Linear(self.hidden_dims[-1], self.out_classes))
-
+        layers.append(nn.Linear(in_features, self.out_classes))
         # ========================
         seq = nn.Sequential(*layers)
         return seq
@@ -194,13 +193,11 @@ class ConvClassifier(nn.Module):
         # Extract features from the input, run the classifier on them and
         # return class scores.
         # ====== YOUR CODE: ======
-
         x = self.feature_extractor(x)
         out = self.classifier(x)
 
         # ========================
         return out
-
 
 class YourCodeNet(ConvClassifier):
     def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
@@ -211,5 +208,5 @@ class YourCodeNet(ConvClassifier):
     # For example, add batchnorm, dropout, skip connections, change conv
     # filter sizes etc.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    # raise NotImplementedError()
     # ========================
