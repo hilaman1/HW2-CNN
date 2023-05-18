@@ -61,9 +61,9 @@ class Trainer(abc.ABC):
 
         for epoch in range(num_epochs):
             verbose = False  # pass this to train/test_epoch.
-            if epoch % print_every == 0 or epoch == num_epochs-1:
+            if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
-            self._print(f'--- EPOCH {epoch+1}/{num_epochs} ---', verbose)
+            self._print(f'--- EPOCH {epoch + 1}/{num_epochs} ---', verbose)
 
             # TODO: Train & evaluate for one epoch
             # - Use the train/test_epoch methods.
@@ -226,8 +226,8 @@ class TorchTrainer(Trainer):
 
         self.optimizer.zero_grad()
 
-        forward_out = self.model(X) # Forward pass
-        loss = self.loss_fn(forward_out, y) # Loss
+        forward_out = self.model(X)  # Forward pass
+        loss = self.loss_fn(forward_out, y)  # Loss
 
         # Backward pass
         loss.backward()
