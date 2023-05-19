@@ -41,7 +41,7 @@ class MLP(Block):
             # add the first linear layer, that outputs to the first hidden layer
             blocks.append(Linear(in_features, hidden_features[0]))
 
-        for i in range(0,len(hidden_features)-1):
+        for i in range(0, len(hidden_features) - 1):
             # add activation function between linear layers
             if activation == 'relu':
                 blocks.append(ReLU())
@@ -49,7 +49,7 @@ class MLP(Block):
                 blocks.append(Sigmoid())
             if (dropout > 0):
                 blocks.append(Dropout(dropout))
-            blocks.append(Linear(hidden_features[i], hidden_features[i+1]))
+            blocks.append(Linear(hidden_features[i], hidden_features[i + 1]))
 
         # add last activation layer
         if activation == 'relu':
@@ -133,7 +133,9 @@ class ConvClassifier(nn.Module):
 
         filter_index = 0
         for i in range(N // P):
+            print(f"i={i}")
             for j in range(P):
+                print(f"in_w={in_w}, in_h={in_h}")
                 out_channels = self.filters[filter_index]
                 convolutional = nn.Conv2d(in_channels, out_channels, kernel_size_conv, stride=stride_conv, padding=padding_conv)
                 layers.append(convolutional)
@@ -198,6 +200,7 @@ class ConvClassifier(nn.Module):
 
         # ========================
         return out
+
 
 class YourCodeNet(ConvClassifier):
     def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):

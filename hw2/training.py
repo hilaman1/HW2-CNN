@@ -94,6 +94,11 @@ class Trainer(abc.ABC):
                 break
             # ========================
 
+        train_loss = [tensor.item() for tensor in train_loss]
+        train_acc = [tensor.item() for tensor in test_acc]
+        test_loss = [tensor.item() for tensor in test_loss]
+        test_acc = [tensor.item() for tensor in test_acc]
+
         return FitResult(actual_num_epochs,
                          train_loss, train_acc, test_loss, test_acc)
 
