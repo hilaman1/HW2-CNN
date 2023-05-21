@@ -127,11 +127,17 @@ We saw in the previous section vanishing and exploding gradients problems. to de
 1. batch normalization
 2. residual blocks (skip connection)
 
-we can see now that for L=3,4 unlike experiment 1 the network was able to train and got results even better then the best of experiment 1.
-for L=2 we can see we got out best result of ~ 90% accuracy and loss of ~ 0.5.
+after each convolutional layer we added batch normalization and skip connection after each 2 blocks except maybe for the last layer (if P was odd)
 
+we used hidden_dims=[128], and increased the bs_train to 150.
 
+we can see now that for L=3,4 unlike experiment 1 the network was able to train and got results even better then the best of experiment 1, 
+it means that technics really helped to deal with the gradients, we used pool_every 3.
 
+in terms of the train loss:
+for L=1 we can got accuracy of ~ 90% and loss of ~ 0.3. (pool every 1)
+for L=2 we can see we got out best result of ~ 94% accuracy and loss of ~ 0.1. (pool every 2)
 
+in terms of the test loss we can see that both L=1 and L=2 got similar results.
 
 """

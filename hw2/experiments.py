@@ -58,8 +58,6 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     # ====== YOUR CODE: ======
     # Create model, loss and optimizer instances
     in_size = ds_train[0][0].shape
-    print(f"in_size = {in_size}")
-
     dl_train = torch.utils.data.DataLoader(ds_train, bs_train, shuffle=False)
     dl_test = torch.utils.data.DataLoader(ds_test, bs_test, shuffle=False)
 
@@ -69,12 +67,10 @@ def run_experiment(run_name, out_dir='./results', seed=None,
         filters += [filter] * layers_per_block
 
     model = model_cls(in_size=in_size, out_classes=10, filters=filters, pool_every=pool_every, hidden_dims=hidden_dims)
-    print(model)
     loss_fn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr, weight_decay=reg)
     trainer = training.TorchTrainer(model, loss_fn, optimizer, device)
     fit_res = trainer.fit(dl_train, dl_test, epochs, checkpoints, early_stopping, print_every=1, max_batches=batches)
-    print("fit_res: ", fit_res)
 
     # ========================
 
