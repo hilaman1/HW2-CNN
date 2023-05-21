@@ -32,7 +32,7 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     :param out_dir: Where to write the output to.
     """
     if not seed:
-        seed = random.randint(0, 2**31)
+        seed = random.randint(0, 2 ** 31)
     torch.manual_seed(seed)
     if not bs_test:
         bs_test = max([bs_train // 4, 1])
@@ -56,7 +56,22 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     #  for you automatically.
     fit_res = None
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    # Create model, loss and optimizer instances
+    in_size = ds_train[0][0].shape
+    dl_train = torch.utils.data.DataLoader(ds_train, bs_train, shuffle=False)
+    dl_test = torch.utils.data.DataLoader(ds_test, bs_test, shuffle=False)
+
+    # if filters_per_layer = [32,64] and layers_per_block = 2 -> [32,32,64,64]
+    filters = []
+    for filter in filters_per_layer:
+        filters += [filter] * layers_per_block
+
+    model = model_cls(in_size=in_size, out_classes=10, filters=filters, pool_every=pool_every, hidden_dims=hidden_dims)
+    loss_fn = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr, weight_decay=reg)
+    trainer = training.TorchTrainer(model, loss_fn, optimizer, device)
+    fit_res = trainer.fit(dl_train, dl_test, epochs, checkpoints, early_stopping, print_every=1, max_batches=batches)
+
     # ========================
 
     save_experiment(run_name, out_dir, cfg, fit_res)

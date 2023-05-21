@@ -18,6 +18,7 @@ class Trainer(abc.ABC):
     - Single epoch (train_epoch/test_epoch)
     - Single batch (train_batch/test_batch)
     """
+
     def __init__(self, model, loss_fn, optimizer, device=None):
         """
         Initialize the trainer.
@@ -60,9 +61,9 @@ class Trainer(abc.ABC):
 
         for epoch in range(num_epochs):
             verbose = False  # pass this to train/test_epoch.
-            if epoch % print_every == 0 or epoch == num_epochs-1:
+            if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
-            self._print(f'--- EPOCH {epoch+1}/{num_epochs} ---', verbose)
+            self._print(f'--- EPOCH {epoch + 1}/{num_epochs} ---', verbose)
 
             # Train & evaluate for one epoch
             # - Use the train/test_epoch methods.
@@ -92,6 +93,11 @@ class Trainer(abc.ABC):
             if epochs_without_improvement == early_stopping:
                 break
             # ========================
+
+        train_loss = [tensor.item() for tensor in train_loss]
+        train_acc = [tensor.item() for tensor in train_acc]
+        test_loss = [tensor.item() for tensor in test_loss]
+        test_acc = [tensor.item() for tensor in test_acc]
 
         return FitResult(actual_num_epochs,
                          train_loss, train_acc, test_loss, test_acc)
@@ -250,7 +256,19 @@ class TorchTrainer(Trainer):
         # - Optimize params
         # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+
+        self.optimizer.zero_grad()
+
+        forward_out = self.model(X)  # Forward pass
+        loss = self.loss_fn(forward_out, y)  # Loss
+
+        # Backward pass
+        loss.backward()
+        self.optimizer.step()
+
+        # Calculate number of correct predictions
+        forward_out = torch.argmax(forward_out, dim=1)  # return the argmax(index) for each row in the tensor
+        num_correct = torch.sum(forward_out == y)  # output == y returns true/false array
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -266,7 +284,9 @@ class TorchTrainer(Trainer):
             # - Forward pass
             # - Calculate number of correct predictions
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            out = self.model(X)
+            loss = self.loss_fn(out, y)
+            num_correct = torch.sum(torch.argmax(out, dim=1) == y)
             # ========================
 
         return BatchResult(loss, num_correct)
