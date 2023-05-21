@@ -318,17 +318,14 @@ class ResidualBlock(nn.Module):
             )
 
     def forward(self, x):
-        print("running forward of residual block 2 ")
+        print("running forward of residual block")
         print(x.size())
         identity = x
-        print(identity.size())
         if self.skip is not None:
             identity = self.skip(identity)
-            print("in iof")
-            print(identity.size())
+            print("in if")
         out = self.block(x)
 
-        print(f"adding identity, out={out.size()}, identity={identity.size()}")
         out += identity
         out = F.relu(out)
 
