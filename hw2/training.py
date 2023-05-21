@@ -95,7 +95,7 @@ class Trainer(abc.ABC):
             # ========================
 
         train_loss = [tensor.item() for tensor in train_loss]
-        train_acc = [tensor.item() for tensor in test_acc]
+        train_acc = [tensor.item() for tensor in train_acc]
         test_loss = [tensor.item() for tensor in test_loss]
         test_acc = [tensor.item() for tensor in test_acc]
 

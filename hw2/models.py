@@ -136,6 +136,7 @@ class ConvClassifier(nn.Module):
             print(f"i={i}")
             for j in range(P):
                 print(f"in_w={in_w}, in_h={in_h}")
+
                 out_channels = self.filters[filter_index]
                 convolutional = nn.Conv2d(in_channels, out_channels, kernel_size_conv, stride=stride_conv, padding=padding_conv)
                 layers.append(convolutional)
@@ -156,6 +157,7 @@ class ConvClassifier(nn.Module):
 
         self.h = in_h
         self.w = in_w
+        print(f"final: in_w={in_w}, in_h={in_h}")
 
         # ========================
         seq = nn.Sequential(*layers)
@@ -176,6 +178,8 @@ class ConvClassifier(nn.Module):
 
         # we take the image and put it to one long vector
         in_features = self.filters[-1] * self.h * self.w
+        print(self.filters)
+        print(f"in_features in _make_classifier: {in_features}")
 
         for i in range(M):
             out_features = self.hidden_dims[i]
@@ -211,5 +215,121 @@ class YourCodeNet(ConvClassifier):
     # For example, add batchnorm, dropout, skip connections, change conv
     # filter sizes etc.
     # ====== YOUR CODE: ======
-    # raise NotImplementedError()
+    def _make_feature_extractor(self):
+        in_channels, in_h, in_w, = tuple(self.in_size)
+
+        layers = []
+        # TODO: Create the feature extractor part of the model:
+        # [(Conv -> ReLU)*P -> MaxPool]*(N/P)
+        # Use only dimension-preserving 3x3 convolutions. Apply 2x2 Max
+        # Pooling to reduce dimensions.
+        # ====== YOUR CODE: ======
+        N = len(self.filters)
+        P = self.pool_every
+
+        # ((N + 2 * padding - F) / stride) + 1
+
+        kernel_size_conv = (3, 3)
+        stride_conv = (1, 1)
+        padding_conv = (1, 1)
+
+        kernel_size_max_pool = (2, 2)
+        stride_max_pool = (2, 2)
+        padding_max_pool = (0, 0)
+
+        filter_index = 0
+        channel1 = in_channels
+        print("add prints2")
+        print(f"in_w={in_w}, in_h={in_h}")
+        for i in range(N // P):
+            print(f"i={i}")
+            for j in range(0, P - 1, 2):
+                channel2 = self.filters[filter_index]
+                channel3 = self.filters[filter_index + 1]
+                print(f"Input Channels: {channel1}, Middle Channel {channel2}, Output Channels: {channel3}")
+
+                layers.append(ResidualBlock([channel1, channel2, channel3]))
+
+                channel1 = channel3
+                filter_index += 2
+
+                in_h = ((in_h + 2 * padding_conv[0] - kernel_size_conv[0]) // stride_conv[0]) + 1
+                in_w = ((in_w + 2 * padding_conv[1] - kernel_size_conv[1]) // stride_conv[1]) + 1
+                # in_h = ((in_h + 2 * padding_conv[0] - kernel_size_conv[0]) // stride_conv[0]) + 1
+                # in_w = ((in_w + 2 * padding_conv[1] - kernel_size_conv[1]) // stride_conv[1]) + 1
+                print(f"Tensor Size: ({in_channels}, {in_h}, {in_w})")
+
+            if P % 2 == 1:
+                channel2 = self.filters[filter_index]
+                layers.append(ResidualBlock([channel1, channel2]))
+                in_h = ((in_h + 2 * padding_conv[0] - kernel_size_conv[0]) // stride_conv[0]) + 1
+                in_w = ((in_w + 2 * padding_conv[1] - kernel_size_conv[1]) // stride_conv[1]) + 1
+                channel1 = channel2
+                filter_index += 1
+
+            layers.append(nn.MaxPool2d(kernel_size_max_pool, stride_max_pool, padding_max_pool))
+
+            in_h = ((in_h + 2 * padding_max_pool[0] - kernel_size_max_pool[0]) // stride_max_pool[0]) + 1
+            in_w = ((in_w + 2 * padding_max_pool[1] - kernel_size_max_pool[1]) // stride_max_pool[1]) + 1
+            print(f"Tensor Size after MaxPool: ({in_channels}, {in_h}, {in_w})")
+
+        self.h = in_h
+        self.w = in_w
+        print(f"final: in_w={in_w}, in_h={in_h}")
+
+        # ========================
+        seq = nn.Sequential(*layers)
+        return seq
+
     # ========================
+
+
+class ResidualBlock(nn.Module):
+    def __init__(self, filters):
+        """
+        Args:
+          filters (list): list of size 3 with channels sizes for the block
+        """
+        super().__init__()
+
+        self.skip = nn.Sequential()
+
+        if filters[0] != filters[-1]:
+            print(f"{filters[0]} != {filters[-1]}")
+            self.skip = nn.Sequential(
+                nn.Conv2d(in_channels=filters[0], out_channels=filters[-1], kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
+                nn.BatchNorm2d(filters[-1]))
+        else:
+            self.skip = None
+
+        if len(filters) == 3:
+            self.block = nn.Sequential(
+                nn.Conv2d(in_channels=filters[0], out_channels=filters[1], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)),
+                nn.BatchNorm2d(filters[1]),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(in_channels=filters[1], out_channels=filters[2], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)),
+                nn.BatchNorm2d(filters[2])
+            )
+        else:
+            self.block = nn.Sequential(
+                nn.Conv2d(in_channels=filters[0], out_channels=filters[1], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)),
+                nn.BatchNorm2d(filters[1]),
+                nn.ReLU(inplace=True),
+            )
+
+    def forward(self, x):
+        print("running forward of residual block 2 ")
+        print(x.size())
+        identity = x
+        print(identity.size())
+        if self.skip is not None:
+            identity = self.skip(identity)
+            print("in iof")
+            print(identity.size())
+        out = self.block(x)
+
+        print(f"adding identity, out={out.size()}, identity={identity.size()}")
+        out += identity
+        out = F.relu(out)
+
+        return out
