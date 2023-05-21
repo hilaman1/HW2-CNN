@@ -83,8 +83,6 @@ def save_experiment(run_name, out_dir, config, fit_res):
         results=fit_res._asdict()
     )
     output_filename = f'{os.path.join(out_dir, run_name)}.json'
-    if os.path.exists(output_filename):
-        os.remove(output_filename)
     os.makedirs(out_dir, exist_ok=True)
     with open(output_filename, 'w') as f:
         json.dump(output, f, indent=2)
