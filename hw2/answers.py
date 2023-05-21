@@ -99,7 +99,9 @@ Similarly to experiment 1.1, for L=4 we got the best results, one thing to notic
 meaning we can probably get better accuracy by increasing K.
 
 for L=2 in terms of the test loss and accuracy K=32 has the best results and in terms of the train loss and accuracy K=258 has the best results.
+
 for L=4 we can see that K=258 has the best results for all parameters, the train accuracy higher the 80% and the test log loss was under 1.
+
 for L=8 similarly to section 1.1 we were overfitting, the loss was stuck at 2.3 and the accuracy didn't go above 10% (like guessing the result), the cause of this is similar to what was explained in 1.1
 
 """
@@ -108,9 +110,12 @@ part3_q3 = r"""
 Because the now the network has higher complexity we can reduce it from the other side by defining only 1 hidden dimension of 128 and reducing to 100 batches.
 We ran it with the same configuration as the previous section except for pool_every.
 
-for L=1 we set pool_every = 1. 
+for L=1 we set pool_every = 1.
+
 for L=2 we set pool_every = 2.
+
 for L=3 we set pool_every = 2.
+
 for L=4 we set pool_every = 3.
 
 we can see that for L=3,4 the network wasn't able to train, the accuracy was 10% and wasn't changed since the beginning.
@@ -135,7 +140,9 @@ we can see now that for L=3,4 unlike experiment 1 the network was able to train 
 it means that technics really helped to deal with the gradients, we used pool_every 3.
 
 in terms of the train loss:
+
 for L=1 we can got accuracy of ~ 90% and loss of ~ 0.3. (pool every 1)
+
 for L=2 we can see we got out best result of ~ 94% accuracy and loss of ~ 0.1. (pool every 2)
 
 in terms of the test loss we can see that both L=1 and L=2 got similar results.
