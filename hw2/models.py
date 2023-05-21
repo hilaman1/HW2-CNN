@@ -302,20 +302,21 @@ class ResidualBlock(nn.Module):
         else:
             self.skip = None
 
+        layers = []
+        print("new layers configuration")
+
         if len(filters) == 3:
-            self.block = nn.Sequential(
-                nn.Conv2d(in_channels=filters[0], out_channels=filters[1], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)),
-                nn.BatchNorm2d(filters[1]),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(in_channels=filters[1], out_channels=filters[2], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)),
-                nn.BatchNorm2d(filters[2])
-            )
+            layers.append(nn.Conv2d(in_channels=filters[0], out_channels=filters[1], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)))
+            layers.append(nn.BatchNorm2d(filters[1]))
+            layers.append(nn.ReLU(inplace=True))
+            layers.append(nn.Conv2d(in_channels=filters[1], out_channels=filters[2], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)))
+            layers.append(nn.BatchNorm2d(filters[2]))
         else:
-            self.block = nn.Sequential(
-                nn.Conv2d(in_channels=filters[0], out_channels=filters[1], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)),
-                nn.BatchNorm2d(filters[1]),
-                nn.ReLU(inplace=True),
-            )
+            layers.append(nn.Conv2d(in_channels=filters[0], out_channels=filters[1], kernel_size=(3, 3), padding=(1, 1), stride=(1, 1)))
+            layers.append(nn.BatchNorm2d(filters[1]))
+            layers.append(nn.ReLU(inplace=True))
+
+        self.block = nn.Sequential(*layers)
 
     def forward(self, x):
         print("running forward of residual block")
